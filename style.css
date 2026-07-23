@@ -370,18 +370,18 @@ body {
     .card-stack-section {
         left: 0;
         width: 55%;
-        top: 25%;
+        top: 30%;
         height: 45vh;
-        transform: translate(10px, -60px);
+        transform: translate(10px, -30px);
     }
 }
 
 @media (max-width: 380px) {
     .card-stack-section {
         width: 62%;
-        top: 24%;
+        top: 28%;
         height: 40vh;
-        transform: translate(4px, -40px);
+        transform: translate(4px, -10px);
     }
 }
 
@@ -505,7 +505,7 @@ body {
 
 @media (max-width: 600px) {
     .cta-stack {
-        bottom: 8%;
+        bottom: 4%;
         width: 90vw;
     }
 }
