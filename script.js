@@ -66,3 +66,32 @@ function updateCartBadge() {
 document.addEventListener('DOMContentLoaded', () => {
     updateCartBadge();
 });
+
+
+
+
+// Pop-up click controller
+document.addEventListener('DOMContentLoaded', () => {
+    const trigger = document.getElementById('customOrderTrigger');
+    const backdrop = document.getElementById('popupBackdrop');
+    const closeBtn = document.getElementById('closePopup');
+
+    if (trigger && backdrop && closeBtn) {
+        // Open pop-up when clicking the box
+        trigger.addEventListener('click', () => {
+            backdrop.classList.add('active');
+        });
+
+        // Close pop-up when clicking 'X'
+        closeBtn.addEventListener('click', () => {
+            backdrop.classList.remove('active');
+        });
+
+        // Close pop-up when clicking outside the box
+        backdrop.addEventListener('click', (e) => {
+            if (e.target === backdrop) {
+                backdrop.classList.remove('active');
+            }
+        });
+    }
+});
