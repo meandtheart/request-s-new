@@ -353,8 +353,8 @@ body {
 /* Card Stack Layout Styling */
 .card-stack-section {
     position: absolute;
-    top: 30%;
-	transform: translate(30px, -100px);
+    top: 26%;
+	transform: translate(30px, -110px);
     left: 6%;
     width: 200px;
     height: 200px;
@@ -370,7 +370,7 @@ body {
     .card-stack-section {
         left: 0;
         width: 55%;
-        top: 30%;
+        top: 20%;
         height: 45vh;
         transform: translate(10px, -30px);
     }
@@ -379,7 +379,7 @@ body {
 @media (max-width: 380px) {
     .card-stack-section {
         width: 62%;
-        top: 28%;
+        top: 18%;
         height: 40vh;
         transform: translate(4px, -10px);
     }
@@ -505,7 +505,7 @@ body {
 
 @media (max-width: 600px) {
     .cta-stack {
-        bottom: 4%;
+        bottom: 2%;
         width: 90vw;
     }
 }
