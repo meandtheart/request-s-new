@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Yaeneko</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -97,7 +97,7 @@
     <script src="script.js"></script>
 
 <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState } = React;
         const { motion } = window.Motion;
 
         const PERSPECTIVE = 1000;
@@ -116,9 +116,13 @@
 
         function CardStack({
             images = YOUR_IMAGES,
-            swipeThreshold = 40,
-            tiltAngle = -30,
+            cardWidth = 200,  /* 👈 INCREASED WIDTH */
+            cardHeight = 350,
+            cardRadius = 20,
+            swipeThreshold = 50,
+            tiltAngle = -45,
             tiltAngleStart = 0,
+            xOffset = -180,
             transition = { type: "spring", stiffness: 300, damping: 30 },
         }) {
             const imgs = Array.isArray(images) && images.length > 0 ? images : YOUR_IMAGES;
@@ -131,19 +135,6 @@
                     imageIndex: i,
                 }))
             );
-
-            // Responsive sizing setup
-            const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
-
-            useEffect(() => {
-                const handleResize = () => setIsMobile(window.innerWidth <= 600);
-                window.addEventListener('resize', handleResize);
-                return () => window.removeEventListener('resize', handleResize);
-            }, []);
-
-            const cardWidth = isMobile ? 140 : 180;
-            const cardHeight = isMobile ? 240 : 300;
-            const xOffset = isMobile ? -70 : -140;
 
             const [isPressed, setIsPressed] = useState(false);
             const [shouldReturnToCenter, setShouldReturnToCenter] = useState(false);
@@ -168,8 +159,8 @@
 
             const getCardStyle = (index) => {
                 const totalCards = cards.length;
-                const stackOffset = index * 6;
-                const scaleValue = 1 - index * 0.04;
+                const stackOffset = index * 8;
+                const scaleValue = 1 - index * 0.05;
                 const rotationValue =
                     totalCards > 1
                         ? tiltAngleStart + (index / (totalCards - 1)) * (tiltAngle - tiltAngleStart)
@@ -196,7 +187,7 @@
                     style={{
                         width: "100%",
                         display: "flex",
-                        alignItems: "center",
+                        alignItems: "flex-start",
                         justifyContent: "center",
                         position: "relative",
                         perspective: `${PERSPECTIVE}px`,
@@ -212,7 +203,7 @@
                                 <motion.div
                                     key={card.id}
                                     drag={isTopCard ? "x" : false}
-                                    dragConstraints={{ left: -200, right: 100, top: 0, bottom: 0 }}
+                                    dragConstraints={{ left: -cardWidth * 1.5, right: cardWidth * 0.75, top: 0, bottom: 0 }}
                                     dragElastic={0.1}
                                     dragMomentum={false}
                                     onMouseDown={isTopCard ? handlePointerDown : undefined}
@@ -237,9 +228,9 @@
                                     }}
                                     style={{
                                         position: "absolute",
-                                        width: cardWidth,
+                                        width: cardWidth, /* Explicitly sets wide width */
                                         height: "100%",
-                                        borderRadius: 16,
+                                        borderRadius: cardRadius,
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
@@ -249,10 +240,9 @@
                                         backgroundSize: "cover",
                                         backgroundPosition: "center",
                                         backgroundColor: "#f0eade",
-                                        border: "2px solid #ab9685",
-                                        boxShadow: "0 10px 25px rgba(92, 77, 76, 0.2)",
+                                        border: "3px solid #ab9685",
+                                        boxShadow: "0 15px 35px rgba(92, 77, 76, 0.2)",
                                         overflow: "hidden",
-                                        touchAction: "none"
                                     }}
                                 />
                             );
@@ -262,11 +252,41 @@
             );
         }
 
+        // Picks card dimensions proportional to the current viewport so the
+        // exact same CardStack component looks right on any phone size,
+        // instead of always rendering a fixed 200x350 card.
+        function getResponsiveCardProps() {
+            const w = window.innerWidth;
+            if (w <= 380) {
+                return { cardWidth: 128, cardHeight: 210, xOffset: -105 };
+            }
+            if (w <= 600) {
+                return { cardWidth: 150, cardHeight: 250, xOffset: -125 };
+            }
+            if (w <= 768) {
+                return { cardWidth: 170, cardHeight: 290, xOffset: -150 };
+            }
+            return { cardWidth: 200, cardHeight: 350, xOffset: -180 };
+        }
+
         const cardRoot = document.getElementById("cardStackRoot");
         if (cardRoot) {
             const root = ReactDOM.createRoot(cardRoot);
-            root.render(<CardStack />);
+
+            const renderCardStack = () => {
+                root.render(<CardStack {...getResponsiveCardProps()} />);
+            };
+
+            renderCardStack();
+
+            // Re-render on resize/orientation change (debounced) so rotating
+            // the phone or resizing keeps the cards correctly scaled.
+            let resizeTimer;
+            window.addEventListener("resize", () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(renderCardStack, 150);
+            });
         }
     </script>
- </body>
+</body>
 </html>
