@@ -97,7 +97,7 @@
     <script src="script.js"></script>
 
 <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
         const { motion } = window.Motion;
 
         const PERSPECTIVE = 1000;
@@ -116,13 +116,9 @@
 
         function CardStack({
             images = YOUR_IMAGES,
-            cardWidth = 200,  /* 👈 INCREASED WIDTH */
-            cardHeight = 350,
-            cardRadius = 20,
-            swipeThreshold = 50,
-            tiltAngle = -45,
+            swipeThreshold = 40,
+            tiltAngle = -30,
             tiltAngleStart = 0,
-            xOffset = -180,
             transition = { type: "spring", stiffness: 300, damping: 30 },
         }) {
             const imgs = Array.isArray(images) && images.length > 0 ? images : YOUR_IMAGES;
@@ -135,6 +131,19 @@
                     imageIndex: i,
                 }))
             );
+
+            // Responsive sizing setup
+            const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+
+            useEffect(() => {
+                const handleResize = () => setIsMobile(window.innerWidth <= 600);
+                window.addEventListener('resize', handleResize);
+                return () => window.removeEventListener('resize', handleResize);
+            }, []);
+
+            const cardWidth = isMobile ? 140 : 180;
+            const cardHeight = isMobile ? 240 : 300;
+            const xOffset = isMobile ? -70 : -140;
 
             const [isPressed, setIsPressed] = useState(false);
             const [shouldReturnToCenter, setShouldReturnToCenter] = useState(false);
@@ -159,8 +168,8 @@
 
             const getCardStyle = (index) => {
                 const totalCards = cards.length;
-                const stackOffset = index * 8;
-                const scaleValue = 1 - index * 0.05;
+                const stackOffset = index * 6;
+                const scaleValue = 1 - index * 0.04;
                 const rotationValue =
                     totalCards > 1
                         ? tiltAngleStart + (index / (totalCards - 1)) * (tiltAngle - tiltAngleStart)
@@ -187,7 +196,7 @@
                     style={{
                         width: "100%",
                         display: "flex",
-                        alignItems: "flex-start",
+                        alignItems: "center",
                         justifyContent: "center",
                         position: "relative",
                         perspective: `${PERSPECTIVE}px`,
@@ -203,7 +212,7 @@
                                 <motion.div
                                     key={card.id}
                                     drag={isTopCard ? "x" : false}
-                                    dragConstraints={{ left: -300, right: 150, top: 0, bottom: 0 }}
+                                    dragConstraints={{ left: -200, right: 100, top: 0, bottom: 0 }}
                                     dragElastic={0.1}
                                     dragMomentum={false}
                                     onMouseDown={isTopCard ? handlePointerDown : undefined}
@@ -228,9 +237,9 @@
                                     }}
                                     style={{
                                         position: "absolute",
-                                        width: cardWidth, /* Explicitly sets wide width */
+                                        width: cardWidth,
                                         height: "100%",
-                                        borderRadius: cardRadius,
+                                        borderRadius: 16,
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
@@ -240,9 +249,10 @@
                                         backgroundSize: "cover",
                                         backgroundPosition: "center",
                                         backgroundColor: "#f0eade",
-                                        border: "3px solid #ab9685",
-                                        boxShadow: "0 15px 35px rgba(92, 77, 76, 0.2)",
+                                        border: "2px solid #ab9685",
+                                        boxShadow: "0 10px 25px rgba(92, 77, 76, 0.2)",
                                         overflow: "hidden",
+                                        touchAction: "none"
                                     }}
                                 />
                             );
@@ -258,5 +268,5 @@
             root.render(<CardStack />);
         }
     </script>
-</body>
+ </body>
 </html>
