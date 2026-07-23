@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yaeneko</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+
+    <div class="page-bg"></div>
+
+    <header class="shop-header">
+        <h1 class="logo">Yaeneko</h1>
+        
+        <a href="shop.html" class="explore-btn">
+            Explore all creations
+        </a>
+
+        <a href="cart.html" class="cart-btn" aria-label="View Cart">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span class="cart-count" id="cartCount">0</span>
+        </a>
+    </header>
+
+    <div class="card-stack-section" id="cardStackRoot"></div>
+
+    <div class="wheel-container" id="wheelContainer">
+        <div class="wheel" id="spinningWheel">
+            <div class="wheel-head-pos head-1">
+                <div class="wheel-content">
+                    <div class="wheel-head"><img src="logo1.jpg" alt="Name 1"></div>
+                    <span class="wheel-label">Name 1</span>
+                </div>
+            </div>
+            <div class="wheel-head-pos head-2">
+                <div class="wheel-content">
+                    <div class="wheel-head"><img src="logo2.png" alt="Name 2"></div>
+                    <span class="wheel-label">Name 2</span>
+                </div>
+            </div>
+            <div class="wheel-head-pos head-3">
+                <div class="wheel-content">
+                    <div class="wheel-head"><img src="logo3.png" alt="Name 3"></div>
+                    <span class="wheel-label">Name 3</span>
+                </div>
+            </div>
+            <div class="wheel-head-pos head-4">
+                <div class="wheel-content">
+                    <div class="wheel-head"><img src="logo4.png" alt="Name 4"></div>
+                    <span class="wheel-label">Name 4</span>
+                </div>
+            </div>
+            <div class="wheel-head-pos head-5">
+                <div class="wheel-content">
+                    <div class="wheel-head"><img src="logo5.png" alt="Name 5"></div>
+                    <span class="wheel-label">Name 5</span>
+                </div>
+            </div>
+            <div class="wheel-head-pos head-6">
+                <div class="wheel-content">
+                    <div class="wheel-head"><img src="logo6.png" alt="Name 6"></div>
+                    <span class="wheel-label">Name 6</span>
+                </div>
+            </div>
+            <div class="wheel-head-pos head-7">
+                <div class="wheel-content">
+                    <div class="wheel-head"><img src="logo7.png" alt="Name 7"></div>
+                    <span class="wheel-label">Name 7</span>
+                </div>
+            </div>
+            <div class="wheel-head-pos head-8">
+                <div class="wheel-content">
+                    <div class="wheel-head"><img src="logo8.png" alt="Name 8"></div>
+                    <span class="wheel-label">Name 8</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+<script type="text/babel">
+        const { useState } = React;
+        const { motion } = window.Motion;
+
+        const PERSPECTIVE = 1000;
+        const DEPTH_SPACING = 10;
+
+        const YOUR_IMAGES = [
+            { src: "logo1.jpg" },
+            { src: "logo2.png" },
+            { src: "logo3.png" },
+            { src: "logo4.png" },
+            { src: "logo5.png" },
+            { src: "logo6.png" },
+            { src: "logo7.png" },
+            { src: "logo8.png" },
+        ];
+
+        function CardStack({
+            images = YOUR_IMAGES,
+            cardWidth = 200,  /* 👈 INCREASED WIDTH */
+            cardHeight = 350,
+            cardRadius = 20,
+            swipeThreshold = 50,
+            tiltAngle = -45,
+            tiltAngleStart = 0,
+            xOffset = -180,
+            transition = { type: "spring", stiffness: 300, damping: 30 },
+        }) {
+            const imgs = Array.isArray(images) && images.length > 0 ? images : YOUR_IMAGES;
+            const actualCardCount = imgs.length;
+
+            const [cards, setCards] = useState(() =>
+                Array.from({ length: actualCardCount }, (_, i) => ({
+                    id: i + 1,
+                    content: `Item ${i + 1}`,
+                    imageIndex: i,
+                }))
+            );
+
+            const [isPressed, setIsPressed] = useState(false);
+            const [shouldReturnToCenter, setShouldReturnToCenter] = useState(false);
+
+            const handlePointerDown = () => setIsPressed(true);
+            const handlePointerUp = () => setIsPressed(false);
+
+            const handleDragEnd = (info) => {
+                setIsPressed(false);
+                const { offset } = info;
+                const distance = Math.sqrt(offset.x * offset.x + offset.y * offset.y);
+                if (distance > swipeThreshold) {
+                    setCards((prevCards) => {
+                        const [topCard, ...restCards] = prevCards;
+                        return [...restCards, topCard];
+                    });
+                } else {
+                    setShouldReturnToCenter(true);
+                    setTimeout(() => setShouldReturnToCenter(false), 1000);
+                }
+            };
+
+            const getCardStyle = (index) => {
+                const totalCards = cards.length;
+                const stackOffset = index * 8;
+                const scaleValue = 1 - index * 0.05;
+                const rotationValue =
+                    totalCards > 1
+                        ? tiltAngleStart + (index / (totalCards - 1)) * (tiltAngle - tiltAngleStart)
+                        : tiltAngleStart;
+                const xOffsetValue =
+                    totalCards > 1 ? (index / (totalCards - 1)) * xOffset : 0;
+                const depthOffset = index * DEPTH_SPACING;
+                const isTopCard = index === 0;
+                const shouldReturn = isTopCard && shouldReturnToCenter;
+
+                return {
+                    zIndex: cards.length - index,
+                    scale: scaleValue,
+                    x: shouldReturn ? 0 : xOffsetValue,
+                    y: shouldReturn ? 0 : -stackOffset,
+                    rotate: shouldReturn ? 0 : rotationValue,
+                    z: -depthOffset,
+                    opacity: 1,
+                };
+            };
+
+            return (
+                <div
+                    style={{
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        justifyContent: "center",
+                        position: "relative",
+                        perspective: `${PERSPECTIVE}px`,
+                    }}
+                >
+                    <div style={{ position: "relative", width: cardWidth, height: cardHeight }}>
+                        {cards.map((card, index) => {
+                            const isTopCard = index === 0;
+                            const cardStyle = getCardStyle(index);
+                            const cardImage = imgs[card.imageIndex];
+
+                            return (
+                                <motion.div
+                                    key={card.id}
+                                    drag={isTopCard ? "x" : false}
+                                    dragConstraints={{ left: -300, right: 150, top: 0, bottom: 0 }}
+                                    dragElastic={0.1}
+                                    dragMomentum={false}
+                                    onMouseDown={isTopCard ? handlePointerDown : undefined}
+                                    onMouseUp={isTopCard ? handlePointerUp : undefined}
+                                    onDragEnd={
+                                        isTopCard
+                                            ? (_, info) => handleDragEnd(info)
+                                            : undefined
+                                    }
+                                    animate={cardStyle}
+                                    transition={{
+                                        x: transition,
+                                        y: transition,
+                                        rotate: transition,
+                                        scale: transition,
+                                        zIndex: { duration: 0.3, ease: "easeOut" },
+                                    }}
+                                    whileDrag={{
+                                        scale: 1.05,
+                                        rotate: tiltAngleStart,
+                                        zIndex: 1000,
+                                    }}
+                                    style={{
+                                        position: "absolute",
+                                        width: cardWidth, /* Explicitly sets wide width */
+                                        height: "100%",
+                                        borderRadius: cardRadius,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        cursor: isTopCard ? (isPressed ? "grabbing" : "grab") : "default",
+                                        userSelect: "none",
+                                        backgroundImage: `url(${cardImage.src})`,
+                                        backgroundSize: "cover",
+                                        backgroundPosition: "center",
+                                        backgroundColor: "#f0eade",
+                                        border: "3px solid #ab9685",
+                                        boxShadow: "0 15px 35px rgba(92, 77, 76, 0.2)",
+                                        overflow: "hidden",
+                                    }}
+                                />
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        }
+
+        const cardRoot = document.getElementById("cardStackRoot");
+        if (cardRoot) {
+            const root = ReactDOM.createRoot(cardRoot);
+            root.render(<CardStack />);
+        }
+    </script>
+</body>
+</html>
